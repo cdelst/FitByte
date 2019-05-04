@@ -73,59 +73,39 @@ def main():
 
     #Heartrate
     fit_statsHR = auth2_client.intraday_time_series('activities/heart', base_date=userDate2, detail_level='1sec')
-    time_list = []
-    heart_list = [] 
-
-    for i in fit_statsHR['activities-heart-intraday']['dataset']:
-        heart_list.append(i['value'])
-        time_list.append(i['time'])
-    heartDF = pd.DataFrame({'Time':time_list, 'Heart Rate':heart_list, })
-    writeToFile(heartDF, 'Heart', 'HeartRate', userDate, True, True, False)
+    intradayDataCollection(fit_statsHR, 
+                           'activities-heart-intraday',
+                           'Heart',
+                           userDate)
 
     #Distance
     fit_statsDST = auth2_client.intraday_time_series('activities/distance', base_date=userDate2, detail_level='1min')
-    distTime_list = []
-    distance_list = [] 
-
-    for i in fit_statsDST['activities-distance-intraday']['dataset']:
-        distance_list.append(i['value'])
-        distTime_list.append(i['time'])
-    distDF = pd.DataFrame({'Time':distTime_list, 'Distance':distance_list,})
-    writeToFile(distDF, 'Distance', 'Distance', userDate, True, True, False)
+    intradayDataCollection(fit_statsDST, 
+                           'activities-distance-intraday',
+                           'Distance',
+                           userDate)
 
     #Steps
     fit_statsSTP = auth2_client.intraday_time_series('activities/steps', base_date=userDate2, detail_level='1min')
-    stTime_list = []
-    steps_list = []
-
-    for i in fit_statsSTP['activities-steps-intraday']['dataset']:
-        steps_list.append(i['value'])
-        stTime_list.append(i['time'])
-    stepsDF = pd.DataFrame({'Time':stTime_list, 'Steps':steps_list,})
-    writeToFile(stepsDF, 'Steps', 'Steps', userDate, True, True, False)
+    intradayDataCollection(fit_statsSTP, 
+                           'activities-steps-intraday',
+                           'Steps',
+                           userDate)
 
     #Elevation
     fit_statsELE = auth2_client.intraday_time_series('activities/elevation', base_date=userDate2, detail_level='1min')
-    eleTime_list = []
-    elevation_list = []
-
-    for i in fit_statsELE['activities-elevation-intraday']['dataset']:
-        eleTime_list.append(i['time'])
-        elevation_list.append(i['value'])
-    elevationDF = pd.DataFrame({'Time':eleTime_list, 'Elevation':elevation_list})
-    writeToFile(elevationDF, 'Elevation', 'Elevation', userDate, True, True, False)
-
+    intradayDataCollection(fit_statsELE, 
+                           'activities-elevation-intraday',
+                           'Elevation',
+                           userDate)
+    
     #Calories
     fit_statsCAL = auth2_client.intraday_time_series('activities/calories', base_date=userDate2, detail_level='1min')
-    calTime_list = []
-    calories_list = []
-
-    for i in fit_statsCAL['activities-calories-intraday']['dataset']:
-        calTime_list.append(i['time'])
-        calories_list.append(i['value'])
-    caloriesDF = pd.DataFrame({'Time':calTime_list, 'Calories':calories_list})
-    writeToFile(caloriesDF, 'Calories', 'Calories', userDate, True, True, False)
-
+    intradayDataCollection(fit_statsCAL, 
+                           'activities-calories-intraday',
+                           'Calories',
+                           userDate)
+    
     #Sleep
     fit_statsSLE = auth2_client.sleep(date=userDate2)
     stime_list = []
@@ -165,9 +145,6 @@ def main():
         #No idea why but outputting to CSV skips a line every fucking time
         fixFuckingWhiteSpaces(tempPath, tempPath2)
     
-    #Summary activity data
-    
-
 
 
 #Takes a DF and writes it to the folder with the file name
@@ -179,6 +156,16 @@ def fixFuckingWhiteSpaces (inPath, outPath):
                 writer.writerow(row)
     os.remove(inPath)
     os.rename(outPath, inPath)
+
+def intradayDataCollection(raw, type, datatype, userDate):
+    timeList = []
+    dataList = [] 
+
+    for i in raw[type]['dataset']:
+        dataList.append(i['value'])
+        timeList.append(i['time'])
+    df = pd.DataFrame({'Time' :timeList, datatype : dataList,})
+    writeToFile(df, datatype, datatype, userDate, True, True, False)
 
 #Takes a data structure and saves it to a csv
 def writeToFile(df, name, folder, date, ind, head, overwrite):
