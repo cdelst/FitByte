@@ -1,0 +1,12 @@
+Gameplan for my makeshift little python app:
+
+1. Data save function--DONE
+    1.5 Figuring out data that I want to save 
+
+2. Correct file name formatting for file save --DONE
+
+3. Loops for making data files out of all the data I want --IN PROGRESS
+
+4. User input defined saving -- TBD
+
+5. Save as much shit as possible
