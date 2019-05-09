@@ -143,12 +143,12 @@ def main():
                 ssummarydf.to_csv(f, header=False, index=False)
         
         #No idea why but outputting to CSV skips a line every fucking time
-        fixFuckingWhiteSpaces(tempPath, tempPath2)
+        fixFuckingCSVWhiteSpaces(tempPath, tempPath2)
     
 
 
 #Takes a DF and writes it to the folder with the file name
-def fixFuckingWhiteSpaces (inPath, outPath):
+def fixFuckingCSVWhiteSpaces (inPath, outPath):
     with open(inPath) as input, open(outPath, 'w', newline='') as output:
         writer = csv.writer(output)
         for row in csv.reader(input):
