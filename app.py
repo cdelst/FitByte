@@ -43,7 +43,7 @@ def main():
 
     timeLastCalled(dt, lastdt)
     if((dt - lastdt) >= expireTime):
-        print('Calling server for new tokens\n')
+        print('Calling server for new tokens...\n')
         server = Oauth2.OAuth2Server(CLIENT_ID, CLIENT_SECRET)
         server.browser_authorize()
         
@@ -68,8 +68,9 @@ def main():
                                 refresh_token=REFRESH_TOKEN)
 
     #Gets date from user
-    userDate = str(input('Input Target Date (YYYYMMDD):'))
+    userDate = str(input('\nInput Target Date (YYYYMMDD):'))
     userDate2 = userDate[0:4] + '-' + userDate[4:6] + '-' + userDate[6:]
+    formalDate = userDate[4:6] + '/' + userDate[6:] + '/' + userDate[0:4]
 
     #Heartrate
     fit_statsHR = auth2_client.intraday_time_series('activities/heart', base_date=userDate2, detail_level='1sec')
@@ -133,18 +134,47 @@ def main():
                     'Restless Duration':fit_statsSum['restlessDuration'],
                     'Time in Bed':fit_statsSum['timeInBed']
                                 } ,index=[0])
-        tempPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary.csv')
-        tempPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
+       
+        sleepSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary.csv')
+        sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
 
-        with open(tempPath,'a') as f:
+        with open(sleepSumPath,'a') as f:
             if(str(input('First? y / n: ')) == 'y'):
                 ssummarydf.to_csv(f, header=True, index=False)
             else:
                 ssummarydf.to_csv(f, header=False, index=False)
         
         #No idea why but outputting to CSV skips a line every fucking time
-        fixFuckingCSVWhiteSpaces(tempPath, tempPath2)
+        fixFuckingCSVWhiteSpaces(sleepSumPath, sleepSumPath2)
     
+
+    #Activity Summary
+    if str(input("Add date to activity summary? y / n: ")) == 'y':
+        sumFitStatsACT = auth2_client.activities(date=userDate2)['summary']
+        actSumDF = pd.DataFrame({'Date':formalDate,
+                        'Activity Calories':sumFitStatsACT['activityCalories'],
+                        'Calories BMR':sumFitStatsACT['caloriesBMR'],
+                        'Calories Out':sumFitStatsACT['caloriesOut'],
+                        'Marginal Calories':sumFitStatsACT['marginalCalories'],
+                        'Elevation':sumFitStatsACT['elevation'],
+                        'Sedentary Minutes':sumFitStatsACT['sedentaryMinutes'],
+                        'Lightly Active Minutes':sumFitStatsACT['lightlyActiveMinutes'],
+                        'Fairly Active Minutes':sumFitStatsACT['fairlyActiveMinutes'],
+                        'Very Active Minutes':sumFitStatsACT['veryActiveMinutes'],
+                        'Floors':sumFitStatsACT['floors'],
+                        'Steps':sumFitStatsACT['steps']} ,index=[0])
+        
+        actSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary.csv')
+        actSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary1.csv')
+
+        with open(actSumPath,'a') as f:
+                if(str(input('First? y / n: ')) == 'y'):
+                    actSumDF.to_csv(f, header=True, index=False)
+                else:
+                    actSumDF.to_csv(f, header=False, index=False)
+        
+        #No idea why but outputting to CSV skips a line every fucking time
+        fixFuckingCSVWhiteSpaces(actSumPath, actSumPath2)
 
 
 #Takes a DF and writes it to the folder with the file name
@@ -181,10 +211,14 @@ def timeLastCalled(current, lastCall):
     days = int(diff / (24 * 60 * 60))
     diff -= (days * 86400)
     hours = int(diff / (60 * 60))
-    diff -= (hours * 360)
+    diff -= (hours * 3600)
     minutes = int(diff / 60)
     seconds = diff - (minutes * 60)
+    print('-----------------------------------------------------------------------------')
     print('Last call was: ' + str(days) + ' Day(s), ' + str(hours) + ' Hour(s), ' + str(minutes) + ' Minute(s), and ' + str(seconds) + ' Second(s) ago')
+    print('No refresh needed' if (days == 0 and hours == 0 and minutes < 10) 
+                              else 'Server call required')
+    print('-----------------------------------------------------------------------------')
 
 if __name__ == "__main__":
     main()
