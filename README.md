@@ -14,7 +14,7 @@ My goal is to store as much data as physically possible, and after gathering eno
     <ol>
     <li>CLIENT_ID</li>
     <li>CLIENT_SECRET</li>
-    <li>Current UNIX time</li>
+    <li>Current UNIX time (Generated automatically after 1st run)</li>
     <li>ACCESS_TOKEN (Acquired through Oauth2)</li>
     <li>REFRESH_TOKEN(Acquired through Oauth2)</li>
     </ol>
