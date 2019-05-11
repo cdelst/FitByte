@@ -78,11 +78,18 @@ def main():
 
     #Gets date from user
     userDate = str(input('\nInput Target Date (YYYYMMDD):'))
+    
     month = userDate[4:6]
     day = userDate[6:]
+    if day[0] == '0':                                                           #Takes out '01' to '1'
+        day2 = day[1]
+    else: day2 = day
     year = userDate[0:4]
+    
     userDate2 = year + '-' + month + '-' + day
     formalDate = month + '/' + day + '/' + year
+    formalDateSpreadsheet = month + '/' + day2 + '/' + year
+
 
     #Heartrate
     fit_statsHR = auth2_client.intraday_time_series('activities/heart',                                 #Calls intraday heart series, interval = 1 sec
@@ -138,14 +145,31 @@ def main():
         stime_list.append(i['dateTime'])
         sval_list.append(i['value'])
 
-    sleepDF = pd.DataFrame({'Time':stime_list, 'State':sval_list})
+    sleepDF = pd.DataFrame({'Time':stime_list, 
+                            'State':sval_list})
     sleepDF['Interpreted'] = sleepDF['State'].map({'2':'Awake', 
                                                    '3':'Very Awake', 
                                                    '1':'Asleep'})
     writeToFile(sleepDF, 'Sleep', 'Sleep', userDate, True, True, False)
 
     #Sleep summary data
-    if str(input("Add date to sleep summary? y / n: ")) == 'y':
+
+    sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
+    sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
+    
+    #FIX THIS, NOT WORKING
+    sleepNotInputted = True
+    with open(sleepSumPath,'a') as f:
+            tempSleepDF = pd.read_csv(sleepSumPath)
+            for i in tempSleepDF['Date']:
+                print('Comparing: ' + i + ' and ' + formalDateSpreadsheet)
+                if type(i) == str and i == formalDateSpreadsheet:
+                    
+                    print('2 Dates are similar')
+                    sleepNotInputted = False
+
+
+    if sleepNotInputted:
         fit_statsSum = auth2_client.sleep(date=userDate2)['sleep'][0]
         ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
                                    'MainSleep':fit_statsSum['isMainSleep'],
@@ -164,11 +188,11 @@ def main():
         
         with open(sleepSumPath,'a') as f:
             tempSleepDF = pd.read_csv(sleepSumPath)                                                     #Sets up file to be checked for header value
-            sleepSumExists = tempSleepDF.empty()                                                        #Checks the file to see if it's empty
+            sleepSumExists = tempSleepDF.empty                                                          #Checks the file to see if it's empty
             ssummarydf.to_csv(f, header=sleepSumExists, index=False)                                    #Writes the summary data to 
         
         #No idea why but outputting to CSV skips a line every fucking time
-        fixFuckingCSVWhiteSpaces(sleepSumPath, sleepSumPath2)
+        fixWhiteSpaces(sleepSumPath, sleepSumPath2)
     
 
     #Activity Summary
@@ -191,17 +215,16 @@ def main():
         actSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary1.csv')
 
         with open(actSumPath,'a') as f:
-                if(str(input('First? y / n: ')) == 'y'):
-                    actSumDF.to_csv(f, header=True, index=False)
-                else:
-                    actSumDF.to_csv(f, header=False, index=False)
+            tempActivityDF = pd.read_csv(actSumPath)                                                     #Sets up file to be checked for header value
+            activitySumExists = tempActivityDF.empty                                                     #Checks the file to see if it's empty
+            ssummarydf.to_csv(f, header=sleepSumExists, index=False)                                     #Writes the summary data to 
         
         #No idea why but outputting to CSV skips a line every fucking time
-        fixFuckingCSVWhiteSpaces(actSumPath, actSumPath2)
+        fixWhiteSpaces(actSumPath, actSumPath2)
 
 
 #Takes a DF and writes it to the folder with the file name
-def fixFuckingCSVWhiteSpaces (inPath, outPath):
+def fixWhiteSpaces(inPath, outPath):
     
     with open(inPath) as input, open(outPath, 'w', newline='') as output:
         writer = csv.writer(output)
@@ -249,6 +272,10 @@ def timeLastCalled(current, lastCall):
     print('No refresh needed' if (days == 0 and hours == 0 and minutes < 10) 
                               else 'Server call required')
     print('-----------------------------------------------------------------------------')
+
+
+#Checks if the summary data is already in the spreadsheet, to not add duplicates
+#def checkAlreadyInputted():
 
 
 #Main:
