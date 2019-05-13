@@ -1,4 +1,4 @@
-# Project Title
+# FitByte
 
 A project I started as I've been getting more and more interested in data manipulation and study after getting a FitBit Charge 3.  Right now it is a very rudimentary data collector using the FitBit web API :
 
