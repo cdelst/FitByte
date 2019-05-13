@@ -28,6 +28,7 @@ python app.py
 
 NOTE: 
 requests-oauthlib = 1.1.0
+
 oauthlib = 2.1.0
 
 These package versions are required for the API to work correctly
