@@ -287,12 +287,12 @@ def timeLastCalled(current, lastCall):
 def checkInputStatus(path, date, name):
     with open(path,'a') as f:
             
-            tempDF = pd.read_csv(path)
-            
-            for i in tempDF['Date']:
-                if type(i) == str and i == date:
-                    print(date + ' has already been inputted in ' + name + ' Summary Page, Skipping. . .')
-                    return False
+        tempDF = pd.read_csv(path)
+        
+        for i in tempDF['Date']:
+            if type(i) == str and i == date:
+                print(date + ' has already been inputted in ' + name + ' Summary Page, Skipping. . .')
+                return False
     return True
                     
 
