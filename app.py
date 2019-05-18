@@ -34,119 +34,123 @@ def main():
     auth2_client = getAuth2Client()
     
     #Gets date from user
-    userDate = str(input('\nInput Target Date (YYYYMMDD):'))
-    date = createDateFormats(userDate)
-
-
-    #Heartrate
-    intradayDataCollection('activities/heart',
-                            auth2_client,
-                            date['dashDate'], 
-                           '1sec', 
-                           'activities-heart-intraday',
-                           'Heart',
-                            userDate)
-    #Distance
-    intradayDataCollection('activities/distance',
-                            auth2_client,
-                            date['dashDate'],                            
-                           '1min',                             
-                           'activities-distance-intraday',
-                           'Distance',
-                            userDate)
-    #Steps
-    intradayDataCollection('activities/steps',  
-                            auth2_client,                              #Calls intraday steps series, interval = 1min
-                            date['dashDate'], 
-                           '1min',
-                           'activities-steps-intraday',
-                           'Steps',
-                            userDate)
-    #Elevation
-    intradayDataCollection('activities/elevation', 
-                            auth2_client,
-                            date['dashDate'], 
-                           '1min',
-                           'activities-elevation-intraday',
-                           'Elevation',
-                            userDate)
-    #Calories
-    intradayDataCollection('activities/calories', 
-                            auth2_client,
-                            date['dashDate'], 
-                           '1min',
-                           'activities-calories-intraday',
-                           'Calories',
-                            userDate)
+    userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] . . .): '))
+    dateArray = userDate.split()
     
-    #Sleep
-    fit_statsSLE = auth2_client.sleep(date=date['dashDate'])
-    stime_list = []
-    sval_list = []
-
-    for i in fit_statsSLE['sleep'][0]['minuteData']:
-        stime_list.append(i['dateTime'])
-        sval_list.append(i['value'])
-
-    sleepDF = pd.DataFrame({'Time':stime_list, 
-                            'State':sval_list})
-    sleepDF['Interpreted'] = sleepDF['State'].map({'2':'Awake', 
-                                                   '3':'Very Awake', 
-                                                   '1':'Asleep'})
-    writeToFile(sleepDF, 'Sleep', 'Sleep', userDate, True, True, False)
+    for dateItem in dateArray:
+        print("Calling Date: " + dateItem)
+        date = createDateFormats(dateItem)
 
 
-    #SLEEP SUMMARY
-    sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
-    sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
-    
-    if checkInputStatus(sleepSumPath, date['spreadDate'], 'Sleep'):
-        fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]
-        ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
-                                   'MainSleep':fit_statsSum['isMainSleep'],
-                                   'Efficiency':fit_statsSum['efficiency'],
-                                   'Duration':fit_statsSum['duration'],
-                                   'Minutes Asleep':fit_statsSum['minutesAsleep'],
-                                   'Minutes Awake':fit_statsSum['minutesAwake'],
-                                   'Awakenings':fit_statsSum['awakeCount'],
-                                   'Restless Count':fit_statsSum['restlessCount'],
-                                   'Restless Duration':fit_statsSum['restlessDuration'],
-                                   'Time in Bed':fit_statsSum['timeInBed']} ,index=[0])
-    
-        with open(sleepSumPath,'a') as f:
-            tempSleepDF = pd.read_csv(sleepSumPath)                                                     #Sets up file to be checked for header value
-            sleepSumExists = tempSleepDF.empty                                                          #Checks the file to see if it's empty
-            ssummarydf.to_csv(f, header=sleepSumExists, index=False)                                    #Writes the summary data to file
-        #No idea why but outputting to CSV skips a line every fucking time
-        fixWhiteSpaces(sleepSumPath, sleepSumPath2)
-    
-
-    #ACTIVITY SUMMARY
-    actSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary.csv')
-    actSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary1.csv')
-
-    if checkInputStatus(actSumPath, date['spreadDate'], 'Activity'):
-        sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
-        actSumDF = pd.DataFrame({'Date':date['slashDate'],
-                                 'Activity Calories':sumFitStatsACT['activityCalories'],
-                                 'Calories BMR':sumFitStatsACT['caloriesBMR'],
-                                 'Calories Out':sumFitStatsACT['caloriesOut'],
-                                 'Marginal Calories':sumFitStatsACT['marginalCalories'],
-                                 'Elevation':sumFitStatsACT['elevation'],
-                                 'Sedentary Minutes':sumFitStatsACT['sedentaryMinutes'],
-                                 'Lightly Active Minutes':sumFitStatsACT['lightlyActiveMinutes'],
-                                 'Fairly Active Minutes':sumFitStatsACT['fairlyActiveMinutes'],
-                                 'Very Active Minutes':sumFitStatsACT['veryActiveMinutes'],
-                                 'Floors':sumFitStatsACT['floors'],
-                                 'Steps':sumFitStatsACT['steps']} ,index=[0])
+        #Heartrate
+        intradayDataCollection('activities/heart',
+                                auth2_client,
+                                date['dashDate'], 
+                                '1sec', 
+                                'activities-heart-intraday',
+                                'Heart',
+                                dateItem)
+        #Distance
+        intradayDataCollection('activities/distance',
+                                auth2_client,
+                                date['dashDate'],                            
+                                '1min',                             
+                                'activities-distance-intraday',
+                                'Distance',
+                                dateItem)
+        #Steps
+        intradayDataCollection('activities/steps',  
+                                auth2_client,                              #Calls intraday steps series, interval = 1min
+                                date['dashDate'], 
+                                '1min',
+                                'activities-steps-intraday',
+                                'Steps',
+                                dateItem)
+        #Elevation
+        intradayDataCollection('activities/elevation', 
+                                auth2_client,
+                                date['dashDate'], 
+                                '1min',
+                                'activities-elevation-intraday',
+                                'Elevation',
+                                dateItem)
+        #Calories
+        intradayDataCollection('activities/calories', 
+                                auth2_client,
+                                date['dashDate'], 
+                                '1min',
+                                'activities-calories-intraday',
+                                'Calories',
+                                dateItem)
         
-        with open(actSumPath,'a') as f:
-            tempActivityDF = pd.read_csv(actSumPath)                                                     #Sets up file to be checked for header value
-            activitySumExists = tempActivityDF.empty                                                     #Checks the file to see if it's empty
-            actSumDF.to_csv(f, header=activitySumExists, index=False)                                    #Writes the summary data to file
+        #Sleep
+        fit_statsSLE = auth2_client.sleep(date=date['dashDate'])
+        stime_list = []
+        sval_list = []
+
+        for i in fit_statsSLE['sleep'][0]['minuteData']:
+            stime_list.append(i['dateTime'])
+            sval_list.append(i['value'])
+
+        sleepDF = pd.DataFrame({'Time':stime_list, 
+                                'State':sval_list})
+        sleepDF['Interpreted'] = sleepDF['State'].map({'2':'Awake', 
+                                                    '3':'Very Awake', 
+                                                    '1':'Asleep'})
+        writeToFile(sleepDF, 'Sleep', 'Sleep', dateItem, True, True, False)
+
+
+        #SLEEP SUMMARY
+        sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
+        sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
         
-        #No idea why but outputting to CSV skips a line every fucking time
-        fixWhiteSpaces(actSumPath, actSumPath2)
+        if checkInputStatus(sleepSumPath, date['spreadDate'], 'Sleep'):
+            fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]
+            ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
+                                    'MainSleep':fit_statsSum['isMainSleep'],
+                                    'Efficiency':fit_statsSum['efficiency'],
+                                    'Duration':fit_statsSum['duration'],
+                                    'Minutes Asleep':fit_statsSum['minutesAsleep'],
+                                    'Minutes Awake':fit_statsSum['minutesAwake'],
+                                    'Awakenings':fit_statsSum['awakeCount'],
+                                    'Restless Count':fit_statsSum['restlessCount'],
+                                    'Restless Duration':fit_statsSum['restlessDuration'],
+                                    'Time in Bed':fit_statsSum['timeInBed']} ,index=[0])
+        
+            with open(sleepSumPath,'a') as f:
+                tempSleepDF = pd.read_csv(sleepSumPath)                                                     #Sets up file to be checked for header value
+                sleepSumExists = tempSleepDF.empty                                                          #Checks the file to see if it's empty
+                ssummarydf.to_csv(f, header=sleepSumExists, index=False)                                    #Writes the summary data to file
+            #No idea why but outputting to CSV skips a line every fucking time
+            fixWhiteSpaces(sleepSumPath, sleepSumPath2)
+        
+
+        #ACTIVITY SUMMARY
+        actSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary.csv')
+        actSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary1.csv')
+
+        if checkInputStatus(actSumPath, date['spreadDate'], 'Activity'):
+            sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
+            actSumDF = pd.DataFrame({'Date':date['spreadDate'],
+                                    'Activity Calories':sumFitStatsACT['activityCalories'],
+                                    'Calories BMR':sumFitStatsACT['caloriesBMR'],
+                                    'Calories Out':sumFitStatsACT['caloriesOut'],
+                                    'Marginal Calories':sumFitStatsACT['marginalCalories'],
+                                    'Elevation':sumFitStatsACT['elevation'],
+                                    'Sedentary Minutes':sumFitStatsACT['sedentaryMinutes'],
+                                    'Lightly Active Minutes':sumFitStatsACT['lightlyActiveMinutes'],
+                                    'Fairly Active Minutes':sumFitStatsACT['fairlyActiveMinutes'],
+                                    'Very Active Minutes':sumFitStatsACT['veryActiveMinutes'],
+                                    'Floors':sumFitStatsACT['floors'],
+                                    'Steps':sumFitStatsACT['steps']} ,index=[0])
+            
+            with open(actSumPath,'a') as f:
+                tempActivityDF = pd.read_csv(actSumPath)                                                     #Sets up file to be checked for header value
+                activitySumExists = tempActivityDF.empty                                                     #Checks the file to see if it's empty
+                actSumDF.to_csv(f, header=activitySumExists, index=False)                                    #Writes the summary data to file
+            
+            #No idea why but outputting to CSV skips a line every fucking time
+            fixWhiteSpaces(actSumPath, actSumPath2)
 
 #Takes the data from tokens.txt and gets the auth2_client needed by API
 def getAuth2Client():
@@ -202,10 +206,8 @@ def getAuth2Client():
 def createDateFormats(userDate):
     #Gets ready to make date formats used by user
     month = userDate[4:6]
-    if month[0] == '0':                                                           #Takes out '01' to '1'
-        month2 = month[1]
-    else: 
-        month2 = month
+    monthInt = int(month)
+    month2 = str(monthInt)
     
     day = userDate[6:]
     if day[0] == '0':                                                           #Takes out '01' to '1'
@@ -240,7 +242,7 @@ def fixWhiteSpaces(inPath, outPath):
 
 
 #Correctly formats and stores the Panda Dataframes given to the function
-def intradayDataCollection(category, auth2_client, apiDate, detail, type, datatype, userDate):
+def intradayDataCollection(category, auth2_client, apiDate, detail, type, datatype, dateItem):
     timeList = []
     dataList = [] 
 
@@ -252,7 +254,7 @@ def intradayDataCollection(category, auth2_client, apiDate, detail, type, dataty
         dataList.append(i['value'])
         timeList.append(i['time'])
     df = pd.DataFrame({'Time' :timeList, datatype : dataList,})
-    writeToFile(df, datatype, datatype, userDate, True, True, False)
+    writeToFile(df, datatype, datatype, dateItem, True, True, False)
 
 
 #Takes a data structure and saves it to a csv
