@@ -35,6 +35,7 @@ def main():
     
     #Gets date from user
     userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] . . .): '))
+    print()
     dateArray = userDate.split()
     
     for dateItem in dateArray:
@@ -104,7 +105,7 @@ def main():
         sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
         sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
         
-        if checkInputStatus(sleepSumPath, date['spreadDate'], 'Sleep'):
+        if checkInputStatus(sleepSumPath, date, 'Sleep'):
             fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]
             ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
                                     'MainSleep':fit_statsSum['isMainSleep'],
@@ -129,7 +130,7 @@ def main():
         actSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary.csv')
         actSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary1.csv')
 
-        if checkInputStatus(actSumPath, date['spreadDate'], 'Activity'):
+        if checkInputStatus(actSumPath, date, 'Activity'):
             sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
             actSumDF = pd.DataFrame({'Date':date['spreadDate'],
                                     'Activity Calories':sumFitStatsACT['activityCalories'],
@@ -265,7 +266,10 @@ def writeToFile(df, name, folder, date, ind, head, overwrite):
     
     if not (os.path.isfile(fullPath)) or overwrite:
         df.to_csv(fullPath, index=ind, header=head)
-    else: print(fileName + ' Already Exists, Skipping. . .')
+    else: 
+#Not Confirmed WORKING
+        spaceLength = (25 - len(fileName))*' '                              #For spacing
+        print(fileName + spaceLength + 'Already Exists, Skipping. . .')
 
 
 #Function to tell the user how long ago they submitted a token refresh
@@ -280,7 +284,7 @@ def timeLastCalled(current, lastCall):
     
     print('-----------------------------------------------------------------------------')
     print('Last call was: ' + str(days) + ' Day(s), ' + str(hours) + ' Hour(s), ' + str(minutes) + ' Minute(s), and ' + str(seconds) + ' Second(s) ago')
-    print('No refresh needed' if (days == 0 and hours == 0 and minutes < 10) 
+    print('No refresh needed, continuing to call: ' if (days == 0 and hours == 0 and minutes < 10) 
                               else 'Server call required')
     print('-----------------------------------------------------------------------------')
 
@@ -292,8 +296,10 @@ def checkInputStatus(path, date, name):
         tempDF = pd.read_csv(path)
         
         for i in tempDF['Date']:
-            if type(i) == str and i == date:
-                print(date + ' has already been inputted in ' + name + ' Summary Page, Skipping. . .')
+            if type(i) == str and i == date['spreadDate']:
+                firstPart = date['inputDate'] + ' ' + name + 'Summary'
+                spaceLength = (24 - len(firstPart))*' '
+                print(firstPart + spaceLength  + ' Already Added,  Skipping. . .')
                 return False
     return True
                     
