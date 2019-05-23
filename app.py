@@ -34,18 +34,20 @@ def main():
     auth2_client = getAuth2Client()
     
     #Gets date from user
-    userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] . . .): '))
+    userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] [DD]. . .): '))
     print()
     dateArray = userDate.split()
     baseDate = userDate[0:6]
     print(baseDate)
 
     for dateItem in dateArray:
+        
+        if len(dateItem) == 2:
+            dateItem = baseDate + dateItem
+        
         print("Calling Date: " + dateItem)
-        #if len(dateItem) == 2:
-        #    dateItem = baseDate + dateItem
+        
         date = createDateFormats(dateItem)
-
 
         #Heartrate
         intradayDataCollection('activities/heart',
@@ -181,6 +183,8 @@ def main():
             
             #No idea why but outputting to CSV skips a line every fucking time
             fixWhiteSpaces(foodSumPath, foodSumPath2)
+
+            print()
 
         
 
