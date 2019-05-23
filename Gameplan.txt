@@ -1,12 +1,29 @@
-Gameplan for my makeshift little python app:
+Gameplan for my makeshift python script:
 
-1. Data save function--DONE
-    1.5 Figuring out data that I want to save 
+DONE:
+-Data save function 
+    -Figure out data that I want to save
+    -Format data in consistent form
+-Correct file name formatting for file save 
+-Creating and saving to CSV automatically
+-Checking to see if CSV already exists, to not overwrite
+-Check summary pages for date inputs, to not overwrite
+-Loops for making data files from multiple dates
+-Automatic api refresh tokens every 10 minutes
+-Tell time since last API Call
 
-2. Correct file name formatting for file save --DONE
 
-3. Loops for making data files out of all the data I want --IN PROGRESS
+IN PROGRESS: 
+-Save as much data from as many different places as possible
+-User input defined saving -- TBD/Probably not
+-
 
-4. User input defined saving -- TBD
+FOR FUTURE:
+-Tell user last date saved on script launch
+-Fix errors when files don't exist
+    -Eliminate dependecies on hand-made files
+    -Make more accessible to anyone who would want to use it, maybe Docker
+-Figure out how to use less API calls for development
+-Thoroughly document and comment
+-Refactor
 
-5. Save as much shit as possible
