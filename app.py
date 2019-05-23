@@ -37,9 +37,13 @@ def main():
     userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] . . .): '))
     print()
     dateArray = userDate.split()
-    
+    baseDate = userDate[0:6]
+    print(baseDate)
+
     for dateItem in dateArray:
         print("Calling Date: " + dateItem)
+        #if len(dateItem) == 2:
+        #    dateItem = baseDate + dateItem
         date = createDateFormats(dateItem)
 
 
@@ -152,6 +156,33 @@ def main():
             
             #No idea why but outputting to CSV skips a line every fucking time
             fixWhiteSpaces(actSumPath, actSumPath2)
+
+        
+        #FOOD SUMMARY
+        foodSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'FoodSummary.csv')
+        foodSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'FoodSummary1.csv')
+
+        if checkInputStatus(foodSumPath, date, 'Food'):
+            foodStatsACT = auth2_client.foods_log(date=date['dashDate'])['summary']
+            foodSumDF = pd.DataFrame({'Date':date['spreadDate'],
+                                    'Calories':foodStatsACT['calories'],
+                                    'Water':foodStatsACT['water'],
+                                    'Carbs':foodStatsACT['carbs'],
+                                    'Fat':foodStatsACT['fat'],
+                                    'Fiber':foodStatsACT['fiber'],
+                                    'Protein':foodStatsACT['protein'],
+                                    'Sodium':foodStatsACT['sodium']}
+                                    ,index=[0])
+            
+            with open(foodSumPath,'a') as f:
+                tempFoodDF = pd.read_csv(foodSumPath)                                                     #Sets up file to be checked for header value
+                foodSumExists = tempFoodDF.empty                                                     #Checks the file to see if it's empty
+                foodSumDF.to_csv(f, header=foodSumExists, index=False)                                    #Writes the summary data to file
+            
+            #No idea why but outputting to CSV skips a line every fucking time
+            fixWhiteSpaces(foodSumPath, foodSumPath2)
+
+        
 
 #Takes the data from tokens.txt and gets the auth2_client needed by API
 def getAuth2Client():
@@ -292,16 +323,18 @@ def timeLastCalled(current, lastCall):
 #OUT: False if data exists, True if not
 def checkInputStatus(path, date, name):
     with open(path,'a') as f:
-            
+                
         tempDF = pd.read_csv(path)
         
         for i in tempDF['Date']:
             if type(i) == str and i == date['spreadDate']:
-                firstPart = date['inputDate'] + ' ' + name + 'Summary'
+                firstPart = date['inputDate'] + '_' + name + 'Summary'
                 spaceLength = (24 - len(firstPart))*' '
                 print(firstPart + spaceLength  + ' Already Added,  Skipping. . .')
                 return False
-    return True
+        
+        return True
+        
                     
 
 
