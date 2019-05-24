@@ -29,7 +29,7 @@ from calendar import monthrange #For days in the month
 
 
 def main():
-    
+
     #Creates the client to access API, see function below
     auth2_client = getAuth2Client()
     
@@ -37,8 +37,9 @@ def main():
     userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] [DD]. . .): '))
     print()
     dateArray = userDate.split()
+
+    #Used for only day input after first input
     baseDate = userDate[0:6]
-    print(baseDate)
 
     for dateItem in dateArray:
         
@@ -210,14 +211,14 @@ def getAuth2Client():
     #Determine if a new server call is required to refresh tokens
     if((dt - lastdt) >= expireTime): #If time last called was greater than 10 minutes ago
         
-        print('Calling server for new tokens...\n')
+        print('\n-----Calling server for new tokens-----\n')
         server = Oauth2.OAuth2Server(CLIENT_ID, CLIENT_SECRET)
         server.browser_authorize()
         
         ACCESS_TOKEN = str(server.fitbit.client.session.token['access_token'])
         REFRESH_TOKEN = str(server.fitbit.client.session.token['refresh_token'])
         
-        print('Writing new tokens to tokens.txt\n')
+        print('\n-----Writing new tokens to tokens.txt-----\n')
         
         #Writes updated information to tokens.txt for next run of program
         with open('tokens.txt', 'w') as f:                                                              #Writes the dependencies into 'tokens.txt' for program runtime           
@@ -237,6 +238,33 @@ def getAuth2Client():
                                 refresh_token=REFRESH_TOKEN)
     
     return auth2_client
+
+
+#Prints the last date that was synced using fitbit
+def printLastSynced(dirList):
+
+    #If no files in directory
+    if len(dirList) == 0:
+        print("No Previous App Calls \n")
+        return
+    
+    #Convert files to two values in 2d array 
+    for i in range(len(dirList)):
+        fileMonth = dirList[i][4:6]
+        fileDay = dirList[i][6:8]
+        dirList[i] = [int(fileMonth), int(fileDay)]
+    
+    highDay = 0
+    highMonth = 0
+    for file in dirList:
+        if file[0] > highMonth:
+            highMonth = file[0]
+            highDay = 1
+        
+        if file[1] > highDay:
+            highDay = file[1]
+    
+    print('Data synced up to : ' + str(highMonth) + '/' + str(highDay))
 
 #Creates all date formats needed by program, stores them in dictionary
 def createDateFormats(userDate):
@@ -317,11 +345,11 @@ def timeLastCalled(current, lastCall):
     minutes = int(diff / 60)
     seconds = diff - (minutes * 60)
     
-    print('-----------------------------------------------------------------------------')
+    print('\n-----------------------------------------------------------------------')
     print('Last call was: ' + str(days) + ' Day(s), ' + str(hours) + ' Hour(s), ' + str(minutes) + ' Minute(s), and ' + str(seconds) + ' Second(s) ago')
-    print('No refresh needed, continuing to call: ' if (days == 0 and hours == 0 and minutes < 10) 
-                              else 'Server call required')
-    print('-----------------------------------------------------------------------------')
+    printLastSynced(os.listdir("data\\Heart\\"))
+    print('No refresh needed, continuing to call: ' if (days == 0 and hours == 0 and minutes < 10) else 'Server call required')
+    print('-----------------------------------------------------------------------')
 
 #IN: Path to File, date['slashDate']
 #OUT: False if data exists, True if not
