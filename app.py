@@ -13,6 +13,8 @@ ToDo :
     2. Get more data
     3. Make the code prettier and push to git
 
+IMPLEMENT https://www.devdungeon.com/content/create-ascii-art-text-banners-python
+
 """
 
 
@@ -115,6 +117,7 @@ def main():
         if checkInputStatus(sleepSumPath, date, 'Sleep'):
             fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]
             ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
+                                    'StartTime':fit_statsSum['startTime'][11:19],
                                     'MainSleep':fit_statsSum['isMainSleep'],
                                     'Efficiency':fit_statsSum['efficiency'],
                                     'Duration':fit_statsSum['duration'],
@@ -305,20 +308,35 @@ def fixWhiteSpaces(inPath, outPath):
     os.rename(outPath, inPath)
 
 
-#Correctly formats and stores the Panda Dataframes given to the function
+#)@#(*$%)(@*#%)(@*&#%)(*@)(%) TEST
+#Correctly formats and stores the Panda Dataframes given to the function, should only call API when the file doesn't exist, to save API calls
 def intradayDataCollection(category, auth2_client, apiDate, detail, type, datatype, dateItem):
     timeList = []
     dataList = [] 
 
-    StatsDict = auth2_client.intraday_time_series(category,                             #Calls intraday calories series, interval = 1min
+    fileName = dateItem + '_' + datatype + '.csv'
+    basePath = os.path.join(os.getcwd(), 'data', datatype)
+    fullPath = os.path.join(basePath, fileName)
+    
+    overwrite = False
+
+    if not (os.path.isfile(fullPath)) or overwrite:
+        StatsDict = auth2_client.intraday_time_series(category,                             #Calls intraday calories series, interval = 1min
                                                   base_date=apiDate, 
                                                   detail_level=detail)
+        
+        for i in StatsDict[type]['dataset']:
+            dataList.append(i['value'])
+            timeList.append(i['time'])
+        df = pd.DataFrame({'Time' :timeList, datatype : dataList,})
+            
+        df.to_csv(fullPath, index=True, header=True)
 
-    for i in StatsDict[type]['dataset']:
-        dataList.append(i['value'])
-        timeList.append(i['time'])
-    df = pd.DataFrame({'Time' :timeList, datatype : dataList,})
-    writeToFile(df, datatype, datatype, dateItem, True, True, False)
+    else: 
+#Not Confirmed WORKING
+        spaceLength = (25 - len(fileName))*' '                              #For spacing
+        print(fileName + spaceLength + 'Already Exists, Skipping. . .')
+
 
 
 #Takes a data structure and saves it to a csv
