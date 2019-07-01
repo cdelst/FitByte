@@ -15,6 +15,7 @@ fitbit-api = "*"
 matplotlib = "*"
 requests-oauthlib = "~=1.1.0"
 oauthlib = "~=2.1.0"
+fcntl = "*"
 
 [requires]
 python_version = "3.7"

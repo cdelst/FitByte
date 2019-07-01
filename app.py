@@ -29,24 +29,28 @@ import os.path
 import csv
 from calendar import monthrange #For days in the month
 
+#Implement automatic date system:
+    # Get starting and ending date
+    # Make an array out of the dates inbetween to make it easier 
+    # FINISH -=-=-=--==--=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 def main():
 
     #Creates the client to access API, see function below
     auth2_client = getAuth2Client()
     
-    #Gets date from user
-    userDate = str(input('\nInput Target Date(s) (YYYYMMDD [YYYYMMDD] [DD]. . .): '))
+    #Saves the last called date for automatic retrieval
+    lastCalledDate = printLastSynced(os.listdir("data\\Heart\\"), False)
+
+    #Gets latest date from user
+    userDate = str(input('\nInput Target Date (YYYYMMDD): '))
     print()
-    dateArray = userDate.split()
+    
+    dateArray = getDateArray(lastCalledDate, userDate)
 
-    #Used for only day input after first input
-    baseDate = userDate[0:6]
 
+    #Loops through all dates from lastSynced to current user input
     for dateItem in dateArray:
-        
-        if len(dateItem) == 2:
-            dateItem = baseDate + dateItem
         
         print("Calling Date: " + dateItem)
         
@@ -189,6 +193,8 @@ def main():
             fixWhiteSpaces(foodSumPath, foodSumPath2)
 
             print()
+        
+    print("Collection successful.")
 
         
 
@@ -244,7 +250,7 @@ def getAuth2Client():
 
 
 #Prints the last date that was synced using fitbit
-def printLastSynced(dirList):
+def printLastSynced(dirList, printBool):
 
     #If no files in directory
     if len(dirList) == 0:
@@ -259,6 +265,8 @@ def printLastSynced(dirList):
     
     highDay = 0
     highMonth = 0
+
+    #Loop to find the highest date in the file system
     for file in dirList:
         if file[0] > highMonth:
             highMonth = file[0]
@@ -266,8 +274,58 @@ def printLastSynced(dirList):
         
         if file[1] > highDay:
             highDay = file[1]
+    if printBool is True:
+        print('Data synced up to : ' + str(highMonth) + '/' + str(highDay))
+
+    return (str(highMonth) + str(highDay))
+
+#Creates an array that is fed into the program to sync multiple dates at once
+def getDateArray(lastCalledDate, userDate):
+        
+    monthDays = {1:31, 2:28, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
     
-    print('Data synced up to : ' + str(highMonth) + '/' + str(highDay))
+    dateArray.append(userDate)
+
+    year = int(userDate[0:4])
+    print(year)
+
+    targetMonth = int(userDate[4:6])
+    print(targetMonth)
+
+    targetDay = int(userDate[6:])
+    print(targetDay)
+
+    prevMonth = int(lastCalledDate[0:2])
+    print(prevMonth)
+
+    prevDay = int(lastCalledDate[2:])
+    print(prevDay)
+
+    #Runs up until 1 day after 
+    #Figure out how to increment and subsequently add the different dates to the array to be stored
+    while targetMonth > prevMonth or targetDay > prevDay:
+
+        prevDay = prevDay + 1
+
+        #If the days have overflowed, it gets set to 1, and month is incremented
+        if monthDays[prevMonth] < prevDay:
+            prevDay = 1
+            prevMonth = prevMonth + 1
+            if prevMonth > 12:
+                exit()
+
+        if prevDay < 10:
+            stringDay = '0' + str(prevDay)
+        else stringDay = str(prevDay)
+
+        if prevMonth < 10:
+            stringMonth = '0' + str(prevMonth)
+        else stringMonth = str(prevMonth)
+
+        arrayElement = year + stringMonth + stringDay
+        dateArray.append(arrayElement)
+    return dateArray
+    
 
 #Creates all date formats needed by program, stores them in dictionary
 def createDateFormats(userDate):
@@ -305,6 +363,7 @@ def fixWhiteSpaces(inPath, outPath):
             if any(field.strip() for field in row):
                 writer.writerow(row)
     os.remove(inPath)
+    time.sleep(.5)                                      #Guarantees that the file will not accidentally not exist
     os.rename(outPath, inPath)
 
 
@@ -363,11 +422,13 @@ def timeLastCalled(current, lastCall):
     minutes = int(diff / 60)
     seconds = diff - (minutes * 60)
     
+    
     print('\n-----------------------------------------------------------------------')
     print('Last call was: ' + str(days) + ' Day(s), ' + str(hours) + ' Hour(s), ' + str(minutes) + ' Minute(s), and ' + str(seconds) + ' Second(s) ago')
-    printLastSynced(os.listdir("data\\Heart\\"))
+    trash = printLastSynced(os.listdir("data\\Heart\\"), True)
     print('No refresh needed, continuing to call: ' if (days == 0 and hours == 0 and minutes < 10) else 'Server call required')
     print('-----------------------------------------------------------------------')
+    return None
 
 #IN: Path to File, date['slashDate']
 #OUT: False if data exists, True if not
