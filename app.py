@@ -49,6 +49,8 @@ def main():
     #Creates the array that is fed into the program for sync
     dateArray = getDateArray(lastCalledDate, userDate)
 
+    #Declares a call amount variable
+    global callAmount = 0
 
     #Loops through all dates from lastSynced to current user input
     for dateItem in dateArray:
@@ -136,7 +138,8 @@ def main():
         if checkInputStatus(sleepSumPath, date, 'Sleep'):
             #If not, get the summary statistics from the api
             fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]
-            
+            callAmount += 1
+
             #Create a data frame from the contents of the api call
             ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
                                     'StartTime':fit_statsSum['startTime'][11:19],
@@ -176,7 +179,8 @@ def main():
             
             #Calls the api for the activity summary
             sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
-            
+            callAmount += 1
+
             #Parses the api call into a dataframe
             actSumDF = pd.DataFrame({'Date':date['spreadDate'],
                                     'Activity Calories':sumFitStatsACT['activityCalories'],
@@ -211,7 +215,10 @@ def main():
         foodSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'FoodSummary1.csv')
 
         if checkInputStatus(foodSumPath, date, 'Food'):
+            
             foodStatsACT = auth2_client.foods_log(date=date['dashDate'])['summary']
+            callAmount += 1
+
             foodSumDF = pd.DataFrame({'Date':date['spreadDate'],
                                     'Calories':foodStatsACT['calories'],
                                     'Water':foodStatsACT['water'],
@@ -233,6 +240,8 @@ def main():
             print()
         
     print("Collection successful.")
+    print(str(callAmount) + " API call(s) were used during this program. ")
+    exit()
 
 
 #Takes the data from tokens.txt and gets the auth2_client needed by API
@@ -488,6 +497,7 @@ def intradayDataCollection(category, auth2_client, apiDate, detail, dtype, datat
         StatsDict = auth2_client.intraday_time_series(category,                             #Calls intraday calories series, interval = 1min
                                                   base_date=apiDate, 
                                                   detail_level=detail)
+        callAmount += 1
         
         #Parses the dictionary
         for i in StatsDict[dtype]['dataset']:
