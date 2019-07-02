@@ -127,7 +127,6 @@ def main():
         #Create a CSV file and save to it
         writeToFile(sleepDF, 'Sleep', 'Sleep', dateItem, True, True, False)
 
-
         #SLEEP SUMMARY
         #Gets the local path of my sleep csv file
         sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
@@ -297,7 +296,6 @@ def getAuth2Client():
     #Return the client
     return auth2_client
 
-
 #Prints the last date that was synced using fitbit
 def printLastSynced(dirList, printBool):
 
@@ -309,6 +307,9 @@ def printLastSynced(dirList, printBool):
     #Convert files to two values in 2d array 
     for i in range(len(dirList)):
 
+        #Pulls the year from the filename
+        fileYear = dirList[i][0:4]
+
         #Pulls the month from the filename
         fileMonth = dirList[i][4:6]
         
@@ -316,29 +317,36 @@ def printLastSynced(dirList, printBool):
         fileDay = dirList[i][6:8]
         
         #Make a combo and save them into dirList
-        dirList[i] = [int(fileMonth), int(fileDay)]
+        dirList[i] = [int(fileYear), int(fileMonth), int(fileDay)]
     
     highDay = 0
     highMonth = 0
+    highYear = 0
 
     #Loop to find the highest date in the file system
     for file in dirList:
         
+        #if the year is greater than previous, set the month to new value, reset days
+        if file[0] > highYear:
+            highYear = file[0]
+            highMonth = 1
+            highDay = 1
+
         #if the month is greater than previous, set the month to new value, reset days
-        if file[0] > highMonth:
+        if file[1] > highMonth:
             highMonth = file[0]
             highDay = 1
         
         #If the day is greater than previous, set the day to new value
-        if file[1] > highDay:
+        if file[2] > highDay:
             highDay = file[1]
     
     #If print was specified in function call, print
     if printBool is True:
-        print('Data synced up to : ' + str(highMonth) + '/' + str(highDay))
+        print('Data synced up to : ' + str(highMonth) + '/' + str(highDay) + '/' + str(highYear))
 
-    #Return the date of the most recent call, signified by high month/day
-    return (str(highMonth) + str(highDay))
+    #Return the date of the most recent call, signified by high year/month/day
+    return (str(highYear) + str(highMonth) + str(highDay))
 
 #Creates an array that is fed into the program to sync multiple dates at once
 def getDateArray(lastCalledDate, userDate):
@@ -371,7 +379,7 @@ def getDateArray(lastCalledDate, userDate):
 
     #Runs up until 1 day after 
     #Figure out how to increment and subsequently add the different dates to the array to be stored
-    while targetMonth > prevMonth or targetDay > prevDay:
+    while (targetMonth > prevMonth) or (targetDay > prevDay) or (targetYear > prevYear):
 
         #Increment day
         prevDay = prevDay + 1
@@ -381,9 +389,10 @@ def getDateArray(lastCalledDate, userDate):
             prevDay = 1
             prevMonth = prevMonth + 1
 
-            #Error if a new year is entered for now
+            #If month > 12, add 1 to year, set month to 1
             if prevMonth > 12:
-                exit()
+                prevMonth = 1
+                year = year + 1
 
         #If day value is <10, add a '0' in front of it
         if prevDay < 10:
@@ -396,7 +405,7 @@ def getDateArray(lastCalledDate, userDate):
         else stringMonth = str(prevMonth)
 
         #Create the new array element
-        arrayElement = year + stringMonth + stringDay
+        arrayElement = str(year) + stringMonth + stringDay
         
         #Add that new element to the end of the array
         dateArray.append(arrayElement)
@@ -404,7 +413,6 @@ def getDateArray(lastCalledDate, userDate):
     #Return that filled date array
     return dateArray
     
-
 #Creates all date formats needed by program, stores them in dictionary
 def createDateFormats(userDate):
     
@@ -460,7 +468,6 @@ def fixWhiteSpaces(inPath, outPath):
     #Make the outPath look exactly like the old inPath, effectively replacing it
     os.rename(outPath, inPath)
 
-
 #Correctly formats and stores the Panda Dataframes given to the function, should only call API when the file doesn't exist, to save API calls
 def intradayDataCollection(category, auth2_client, apiDate, detail, dtype, datatype, dateItem):
     timeList = []
@@ -499,7 +506,6 @@ def intradayDataCollection(category, auth2_client, apiDate, detail, dtype, datat
         spaceLength = (25 - len(fileName))*' '                              #For spacing
         print(fileName + spaceLength + 'Already Exists, Skipping. . .')
 
-
 #May be redundant? 
 #Takes a data structure and saves it to a csv
 def writeToFile(df, name, folder, date, ind, head, overwrite):
@@ -517,7 +523,6 @@ def writeToFile(df, name, folder, date, ind, head, overwrite):
         #Prints a message that the file already exists
         spaceLength = (25 - len(fileName))*' '                              #For spacing
         print(fileName + spaceLength + 'Already Exists, Skipping. . .')
-
 
 #Function to tell the user how long ago they submitted a token refresh
 def timeLastCalled(current, lastCall):
