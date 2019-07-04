@@ -18,16 +18,17 @@ After getting those, replace the two lines in example_tokens.txt, and rename exa
 As of now, you will have to have a file named data with this structure in it in the same file as your script:
 
 -data
-    -Calories
-    -Distance
-    -Elevation
-    -Heart
-    -Sleep
-    -Steps
-    -SummaryData
-        + ActivitySummary.csv
-        + FoodSummary.csv
-        + SleepSummary.csv
+    -Calories  <br>
+    -Distance  <br>
+    -Elevation  <br>
+    -Heart  <br>
+    -Sleep  <br>
+    -Steps  <br>
+    -SummaryData  <br>  
+        + ActivitySummary.csv  <br>     
+        + FoodSummary.csv  <br>
+        + SleepSummary.csv  <br>
+
 
 ### Running
 
