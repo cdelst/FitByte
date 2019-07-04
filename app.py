@@ -1,41 +1,49 @@
-"""
-Callback URL - https://127.0.0.1:8080/
-OAuth 2.0: Authorization URI - https://www.fitbit.com/oauth2/authorize
-OAuth 2.0: Access/Refresh Token Request URI - https://api.fitbit.com/oauth2/token
+""" 
+____________________________________________________________________________________________
+                                                                                            |
+Callback URL - https://127.0.0.1:8080/                                                      |
+OAuth 2.0: Authorization URI - https://www.fitbit.com/oauth2/authorize                      |
+OAuth 2.0: Access/Refresh Token Request URI - https://api.fitbit.com/oauth2/token           |
+                                                                                            |
+DOCUMENTATION:                                                                              |
+https://python-fitbit.readthedocs.io/en/latest/                                             |  
+                                                                                            |
+Epoch of Watch: 4/30/19                                                                     |
+                                                                                            |
+IMPLEMENT https://www.devdungeon.com/content/create-ascii-art-text-banners-python           |
+                                                                                            |
+Epoch of Watch: 4/30/19                                                                     |
+____________________________________________________________________________________________|
 
-DOCUMENTATION:
-https://python-fitbit.readthedocs.io/en/latest/
-
-Epoch of Watch: 4/30/19 
-
-ToDo : 
-    1. Fix the sleep summary data DONE
-    2. Get more data
-    3. Make the code prettier and push to git
-
-IMPLEMENT https://www.devdungeon.com/content/create-ascii-art-text-banners-python
-
-"""
-
+""" 
 
 #Import all the packages that I probably don't need
 import fitbit
-import gather_keys_oauth2 as Oauth2
-import pandas as pd 
-from datetime import datetime
+import sys
+import gather_keys_oauth2   as       Oauth2
+import pandas               as       pd 
 import time
-import matplotlib.pyplot as plt
+import matplotlib.pyplot    as       plt
 import os.path
 import csv
-from calendar import monthrange #For days in the month
-
+from   pyfiglet             import   Figlet
+from   calendar             import   monthrange #For days in the month
+from   datetime             import   datetime
+callAmount = 0
 #Implement automatic date system:
     # Get starting and ending date
     # Make an array out of the dates inbetween to make it easier 
     # FINISH -=-=-=--==--=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-def main():
 
+def main():
+    
+    global callAmount
+    print()
+    print()
+    text_art = Figlet(font='slant')
+    print(text_art.renderText('FitByte'))
+    dateArray = []
     #Creates the client to access API, see function below
     auth2_client = getAuth2Client()
     
@@ -43,14 +51,24 @@ def main():
     lastCalledDate = printLastSynced(os.listdir("data\\Heart\\"), False)
 
     #Gets latest date from user
-    userDate = str(input('\nInput Target Date (YYYYMMDD): '))
-    print()
-    
     #Creates the array that is fed into the program for sync
-    dateArray = getDateArray(lastCalledDate, userDate)
+    if len(sys.argv) > 1 and sys.argv[1] == "-m":
+        print("Entering single date input mode: ")
+        userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
+        
+        print()
+        
+        dateArray.append(userDate)
+        
+    else:
+        userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
+        
+        print()
+        
+        dateArray = getDateArray(lastCalledDate, userDate)
 
     #Declares a call amount variable
-    global callAmount = 0
+    callAmount = 0
 
     #Loops through all dates from lastSynced to current user input
     for dateItem in dateArray:
@@ -107,6 +125,7 @@ def main():
         
         #Gets the sleep data from the api
         fit_statsSLE = auth2_client.sleep(date=date['dashDate'])
+        callAmount += 1
        
         #Initialize lists used
         stime_list = []
@@ -116,8 +135,8 @@ def main():
         for i in fit_statsSLE['sleep'][0]['minuteData']:
             stime_list.append(i['dateTime'])
             sval_list.append(i['value'])
-
-        #Creates a data frame from the parsed dictionary
+        
+        #Creates a panda dataframe from the parsed dictionary
         sleepDF = pd.DataFrame({'Time':stime_list, 
                                 'State':sval_list})
         
@@ -134,10 +153,12 @@ def main():
         sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
         sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
         
+
         #Checks if date has already been inputted
         if checkInputStatus(sleepSumPath, date, 'Sleep'):
             #If not, get the summary statistics from the api
-            fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]
+           
+            fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]            
             callAmount += 1
 
             #Create a data frame from the contents of the api call
@@ -168,6 +189,7 @@ def main():
             #No idea why but outputting to CSV skips a line every time, this fixes that.  See f()
             fixWhiteSpaces(sleepSumPath, sleepSumPath2)
         
+            
 
         #ACTIVITY SUMMARY
         #Get the relative paths to the activity summary file
@@ -343,48 +365,54 @@ def printLastSynced(dirList, printBool):
 
         #if the month is greater than previous, set the month to new value, reset days
         if file[1] > highMonth:
-            highMonth = file[0]
+            highMonth = file[1]
             highDay = 1
         
         #If the day is greater than previous, set the day to new value
         if file[2] > highDay:
-            highDay = file[1]
+            highDay = file[2]
     
     #If print was specified in function call, print
     if printBool is True:
         print('Data synced up to : ' + str(highMonth) + '/' + str(highDay) + '/' + str(highYear))
 
+    if highDay < 10:
+        stringDay = '0' + str(highDay)
+    else: stringDay = str(highDay)
+
+    #If month value is <10, add a '0' in front of it
+    if highMonth < 10:
+        stringMonth = '0' + str(highMonth)
+    else: stringMonth = str(highMonth)
+
+
     #Return the date of the most recent call, signified by high year/month/day
-    return (str(highYear) + str(highMonth) + str(highDay))
+    return (str(highYear) + str(stringMonth) + str(stringDay))
 
 #Creates an array that is fed into the program to sync multiple dates at once
 def getDateArray(lastCalledDate, userDate):
         
+    dateArray = []
     #Initialize the days in each month for future use
-    monthDays = {1:31, 2:28, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
-    
-    #Stores first user inputted date
-    dateArray.append(userDate)
+    monthDays = {"01":31, "02":28, "03":31, "04":30, "05":31, "06":30, "07":31, "08":31, "09":30, "10":31, "11":30, "12":31}
 
     #Gets year from user input
-    year = int(userDate[0:4])
-    print(year)
+    targetYear = int(userDate[0:4])
 
     #Gets month from user
     targetMonth = int(userDate[4:6])
-    print(targetMonth)
 
     #Gets day from user
     targetDay = int(userDate[6:])
-    print(targetDay)
 
+    #Gets year from last call made
+    prevYear = int(lastCalledDate[0:4])
+    
     #Gets month from last call made
-    prevMonth = int(lastCalledDate[0:2])
-    print(prevMonth)
+    prevMonth = int(lastCalledDate[4:6])
 
     #Gets day from last call made
-    prevDay = int(lastCalledDate[2:])
-    print(prevDay)
+    prevDay = int(lastCalledDate[6:])
 
     #Runs up until 1 day after 
     #Figure out how to increment and subsequently add the different dates to the array to be stored
@@ -394,27 +422,32 @@ def getDateArray(lastCalledDate, userDate):
         prevDay = prevDay + 1
 
         #If the days have overflowed, it gets set to 1, and month is incremented
-        if monthDays[prevMonth] < prevDay:
+
+        if prevMonth < 10:
+            stringMonth = '0' + str(prevMonth)
+        else: stringMonth = str(prevMonth)
+
+        if monthDays[stringMonth] < prevDay:
             prevDay = 1
             prevMonth = prevMonth + 1
 
             #If month > 12, add 1 to year, set month to 1
             if prevMonth > 12:
                 prevMonth = 1
-                year = year + 1
+                prevYear = prevYear + 1
 
         #If day value is <10, add a '0' in front of it
         if prevDay < 10:
             stringDay = '0' + str(prevDay)
-        else stringDay = str(prevDay)
+        else: stringDay = str(prevDay)
 
         #If month value is <10, add a '0' in front of it
         if prevMonth < 10:
             stringMonth = '0' + str(prevMonth)
-        else stringMonth = str(prevMonth)
+        else: stringMonth = str(prevMonth)
 
         #Create the new array element
-        arrayElement = str(year) + stringMonth + stringDay
+        arrayElement = str(prevYear) + stringMonth + stringDay
         
         #Add that new element to the end of the array
         dateArray.append(arrayElement)
@@ -428,6 +461,7 @@ def createDateFormats(userDate):
     #Gets ready to make date formats used by user
     year = userDate[0:4]
     month = userDate[4:6]
+    print("Printing month: " + str(month))
     monthInt = int(month)
     month2 = str(monthInt)
     day = userDate[6:]
@@ -479,6 +513,8 @@ def fixWhiteSpaces(inPath, outPath):
 
 #Correctly formats and stores the Panda Dataframes given to the function, should only call API when the file doesn't exist, to save API calls
 def intradayDataCollection(category, auth2_client, apiDate, detail, dtype, datatype, dateItem):
+    global callAmount
+    
     timeList = []
     dataList = [] 
 
