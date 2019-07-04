@@ -6,12 +6,28 @@ https://dev.fitbit.com/build/reference/web-api
 
 My goal is to store as much data as physically possible, and after gathering enough, hopefully create some interesting analysis on my life!  As of now, I am collecting and storing my heart, steps, distance, calories, stories, and sleep data locally on my computer.  I plan on adding more as time goes on, and eventually making it completely user-friendly.  
 
+So far I have implemented features that make my everyday logging of data easier, such as a date-last-called feature, as well as a completely functional sync-up-to feature that syncs from the last called date all the way up to the date you enter.  
+
 ## Getting Started
 
 Recommended with pipenv as an environment manager with python.  Before use, the user has to make a Fitbit Developer account and get two keys:
 USERID, and USERSECRET
 
 After getting those, replace the two lines in example_tokens.txt, and rename example_tokens.txt to "tokens.txt" --IMPORTANT
+
+As of now, you will have to have a file named data with this structure in it in the same file as your script:
+
+-data
+    -Calories
+    -Distance
+    -Elevation
+    -Heart
+    -Sleep
+    -Steps
+    -SummaryData
+        + ActivitySummary.csv
+        + FoodSummary.csv
+        + SleepSummary.csv
 
 ### Running
 
@@ -28,16 +44,20 @@ python app.py
 
 NOTE: 
 
+YOU MUST HAVE EXACTLY THESE DEPENDENCIES INSTALLED FOR THE FITBIT API TO WORK PROPERLY
+
 requests-oauthlib = 1.1.0
 
 oauthlib = 2.1.0
 
 These package versions are required for the API to work correctly
+
 ## Built With
 
 * [Python](https://www.python.org) - Scripting
 * [Fitbit API](https://github.com/orcasgit/python-fitbit) - API
 * [gather_keys_oauth2.py](https://github.com/orcasgit/python-fitbit/blob/master/gather_keys_oauth2.py) - For Oauth2 Authentification
+* [pyfiglet](https://www.devdungeon.com/content/create-ascii-art-text-banners-python) - For Word Art On Launch
 
 ## Contributing
 

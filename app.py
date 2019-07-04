@@ -9,10 +9,6 @@ DOCUMENTATION:                                                                  
 https://python-fitbit.readthedocs.io/en/latest/                                             |  
                                                                                             |
 Epoch of Watch: 4/30/19                                                                     |
-                                                                                            |
-IMPLEMENT https://www.devdungeon.com/content/create-ascii-art-text-banners-python           |
-                                                                                            |
-Epoch of Watch: 4/30/19                                                                     |
 ____________________________________________________________________________________________|
 
 """ 
@@ -30,20 +26,19 @@ from   pyfiglet             import   Figlet
 from   calendar             import   monthrange #For days in the month
 from   datetime             import   datetime
 callAmount = 0
-#Implement automatic date system:
-    # Get starting and ending date
-    # Make an array out of the dates inbetween to make it easier 
-    # FINISH -=-=-=--==--=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
 
 def main():
     
     global callAmount
+    
+    #Prints cool banner using Figlet
     print()
     print()
     text_art = Figlet(font='slant')
     print(text_art.renderText('FitByte'))
+    
     dateArray = []
+    
     #Creates the client to access API, see function below
     auth2_client = getAuth2Client()
     
@@ -58,6 +53,7 @@ def main():
         
         print()
         
+        #Makes an array of only one value
         dateArray.append(userDate)
         
     else:
@@ -65,6 +61,7 @@ def main():
         
         print()
         
+        #Calls the getDateArray function to get a list of dates
         dateArray = getDateArray(lastCalledDate, userDate)
 
     #Declares a call amount variable

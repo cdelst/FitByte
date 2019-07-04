@@ -1,4 +1,4 @@
-Gameplan for my makeshift python script:
+Gameplan for my makeshift python script as of 7/4/19:
 
 DONE:
 -Data save function 
@@ -11,19 +11,20 @@ DONE:
 -Loops for making data files from multiple dates
 -Automatic api refresh tokens every 10 minutes
 -Tell time since last API Call
+-User input defined saving
+-Tell user last date saved on script launch
+-Figure out how to use less API calls for development
+-Thoroughly document and comment
 
 
 IN PROGRESS: 
 -Save as much data from as many different places as possible
--User input defined saving -- TBD/Probably not
--
+-Quality of life improvements
 
 FOR FUTURE:
--Tell user last date saved on script launch
+
 -Fix errors when files don't exist
     -Eliminate dependecies on hand-made files
     -Make more accessible to anyone who would want to use it, maybe Docker
--Figure out how to use less API calls for development
--Thoroughly document and comment
 -Refactor
 
