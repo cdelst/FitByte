@@ -37,34 +37,16 @@ def main():
     text_art = Figlet(font='slant')
     print(text_art.renderText('FitByte'))
     
-    dateArray = []
-    
     #Creates the client to access API, see function below
     auth2_client = getAuth2Client()
     
     #Saves the last called date for automatic retrieval
     lastCalledDate = printLastSynced(os.listdir("data\\Heart\\"), False)
 
-    #Gets latest date from user
-    #Creates the array that is fed into the program for sync
-    if len(sys.argv) > 1 and sys.argv[1] == "-m":
-        print("Entering single date input mode: ")
-        userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
-        
-        print()
-        
-        #Makes an array of only one value
-        dateArray.append(userDate)
-        
-    else:
-        userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
-        
-        print()
-        
-        #Calls the getDateArray function to get a list of dates
-        dateArray = getDateArray(lastCalledDate, userDate)
+    #Calls the getDateArray function to get a list of dates, or one date if -m is entered
+    dateArray = getDateArray(lastCalledDate)
 
-    #Declares a call amount variable
+    #Declares a call amount variable for printing at end of program
     callAmount = 0
 
     #Loops through all dates from lastSynced to current user input
@@ -387,9 +369,26 @@ def printLastSynced(dirList, printBool):
     return (str(highYear) + str(stringMonth) + str(stringDay))
 
 #Creates an array that is fed into the program to sync multiple dates at once
-def getDateArray(lastCalledDate, userDate):
-        
+def getDateArray(lastCalledDate):
+    
     dateArray = []
+
+    #Gets date from user if manual mode
+    #Creates the array that is fed into the program for sync
+    if len(sys.argv) > 1 and sys.argv[1] == "-m":
+        
+        #Print prompts and takes the single date for manual mode
+        print("Entering single date input mode: ")
+        userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
+        print()
+        
+        #Makes an array of only one value
+        dateArray.append(userDate)
+        return dateArray
+
+    #Gets input from user if manual mode is not entered  
+    userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
+    
     #Initialize the days in each month for future use
     monthDays = {"01":31, "02":28, "03":31, "04":30, "05":31, "06":30, "07":31, "08":31, "09":30, "10":31, "11":30, "12":31}
 
@@ -419,7 +418,6 @@ def getDateArray(lastCalledDate, userDate):
         prevDay = prevDay + 1
 
         #If the days have overflowed, it gets set to 1, and month is incremented
-
         if prevMonth < 10:
             stringMonth = '0' + str(prevMonth)
         else: stringMonth = str(prevMonth)
