@@ -27,6 +27,7 @@ from   calendar             import   monthrange #For days in the month
 from   datetime             import   datetime
 callAmount = 0
 
+
 def main():
     
     global callAmount
@@ -132,11 +133,10 @@ def main():
         sleepSumPath = os.path.join(os.getcwd(), 'data','SummaryData', 'SleepSummary.csv')
         sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
         
-
         #Checks if date has already been inputted
         if checkInputStatus(sleepSumPath, date, 'Sleep'):
+            
             #If not, get the summary statistics from the api
-           
             fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]            
             callAmount += 1
 
@@ -169,7 +169,6 @@ def main():
             fixWhiteSpaces(sleepSumPath, sleepSumPath2)
         
             
-
         #ACTIVITY SUMMARY
         #Get the relative paths to the activity summary file
         actSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary.csv')
@@ -229,19 +228,18 @@ def main():
                                     'Protein':foodStatsACT['protein'],
                                     'Sodium':foodStatsACT['sodium']}
                                     ,index=[0])
-            
+                
             with open(foodSumPath,'a') as f:
                 tempFoodDF = pd.read_csv(foodSumPath)                                                    
                 foodSumExists = tempFoodDF.empty                                                     
-                foodSumDF.to_csv(f, header=foodSumExists, index=False)                                    
-            
+                foodSumDF.to_csv(f, header=foodSumExists, index=False) 
             
             fixWhiteSpaces(foodSumPath, foodSumPath2)
 
             print()
         
-    print("Collection successful.")
-    print(str(callAmount) + " API call(s) were used during this program. ")
+    print("-- Collection successful. --")
+    print(str(callAmount) + " API call(s) were used during this program. \n")
     exit()
 
 
@@ -282,7 +280,7 @@ def getAuth2Client():
         ACCESS_TOKEN = str(server.fitbit.client.session.token['access_token'])
         REFRESH_TOKEN = str(server.fitbit.client.session.token['refresh_token'])
         
-        print('\n-----Writing new tokens to tokens.txt-----\n')
+        print('\n-----Writing new tokens to tokens.txt-----')
         
         #Writes updated information to tokens.txt for next run of program
         with open('tokens.txt', 'w') as f:                                                              
@@ -355,15 +353,11 @@ def printLastSynced(dirList, printBool):
     if printBool is True:
         print('Data synced up to : ' + str(highMonth) + '/' + str(highDay) + '/' + str(highYear))
 
-    if highDay < 10:
-        stringDay = '0' + str(highDay)
-    else: stringDay = str(highDay)
+    #If day value is <10, add a '0' in front of it
+    stringDay = getStringVersion(highDay)
 
     #If month value is <10, add a '0' in front of it
-    if highMonth < 10:
-        stringMonth = '0' + str(highMonth)
-    else: stringMonth = str(highMonth)
-
+    stringMonth = getStringVersion(highMonth)
 
     #Return the date of the most recent call, signified by high year/month/day
     return (str(highYear) + str(stringMonth) + str(stringDay))
@@ -411,18 +405,13 @@ def getDateArray(lastCalledDate):
     prevDay = int(lastCalledDate[6:])
 
     #Runs up until 1 day after 
-    #Figure out how to increment and subsequently add the different dates to the array to be stored
     while (targetMonth > prevMonth) or (targetDay > prevDay) or (targetYear > prevYear):
 
         #Increment day
         prevDay = prevDay + 1
 
         #If the days have overflowed, it gets set to 1, and month is incremented
-        if prevMonth < 10:
-            stringMonth = '0' + str(prevMonth)
-        else: stringMonth = str(prevMonth)
-
-        if monthDays[stringMonth] < prevDay:
+        if monthDays[getStringVersion(prevMonth)] < prevDay:
             prevDay = 1
             prevMonth = prevMonth + 1
 
@@ -432,14 +421,10 @@ def getDateArray(lastCalledDate):
                 prevYear = prevYear + 1
 
         #If day value is <10, add a '0' in front of it
-        if prevDay < 10:
-            stringDay = '0' + str(prevDay)
-        else: stringDay = str(prevDay)
+        stringDay = getStringVersion(prevDay)
 
         #If month value is <10, add a '0' in front of it
-        if prevMonth < 10:
-            stringMonth = '0' + str(prevMonth)
-        else: stringMonth = str(prevMonth)
+        stringMonth = getStringVersion(prevMonth)
 
         #Create the new array element
         arrayElement = str(prevYear) + stringMonth + stringDay
@@ -449,14 +434,22 @@ def getDateArray(lastCalledDate):
     
     #Return that filled date array
     return dateArray
+
+#If a less-than-ten value has to be represented as a string, the API requires that it is in "05" format
+def getStringVersion(value):
+
+    if value < 10:
+            stringValue= '0' + str(value)
+    else: stringValue = str(value)
     
+    return stringValue
+
 #Creates all date formats needed by program, stores them in dictionary
 def createDateFormats(userDate):
     
     #Gets ready to make date formats used by user
     year = userDate[0:4]
     month = userDate[4:6]
-    print("Printing month: " + str(month))
     monthInt = int(month)
     month2 = str(monthInt)
     day = userDate[6:]
