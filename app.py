@@ -46,7 +46,7 @@ def main():
 
     #Calls the getDateArray function to get a list of dates, or one date if -m is entered
     dateArray = getDateArray(lastCalledDate)
-
+    print()
     #Declares a call amount variable for printing at end of program
     callAmount = 0
 
@@ -534,11 +534,17 @@ def intradayDataCollection(category, auth2_client, apiDate, detail, dtype, datat
         #Writes the data to a file
         df.to_csv(fullPath, index=True, header=True)
 
+        #Output a message that the file already exists
+        fullMessage = 'Created, Moving On. . .'
+
     else: 
         
         #Output a message that the file already exists
-        spaceLength = (25 - len(fileName))*' '                              #For spacing
-        print(fileName + spaceLength + 'Already Exists, Skipping. . .')
+        fullMessage = 'Already Exists, Skipping. . .'
+    
+    #Outputs a message telling user what happened
+    spaceLength = (25 - len(fileName))*' '                             
+    print('    - ' + fileName + spaceLength + fullMessage)
 
 #May be redundant? 
 #Takes a data structure and saves it to a csv
@@ -548,15 +554,19 @@ def writeToFile(df, name, folder, date, ind, head, overwrite):
     fileName = date + '_' + name + '.csv'
     basePath = os.path.join(os.getcwd(), 'data', folder)
     fullPath = os.path.join(basePath, fileName)
+    fullMessage = ''
     
     #If the file doesn't exist, or overwrite is on 
     if not (os.path.isfile(fullPath)) or overwrite:
         df.to_csv(fullPath, index=ind, header=head)
+        fullMessage = 'Updated, Moving On. . .'
+    
     else: 
-        
-        #Prints a message that the file already exists
-        spaceLength = (25 - len(fileName))*' '                              #For spacing
-        print(fileName + spaceLength + 'Already Exists, Skipping. . .')
+        fullMessage = 'Already Exists, Skipping. . .'
+
+    #Prints a message that the file already exists
+    spaceLength = (25 - len(fileName))*' '                              
+    print('    - ' + fileName + spaceLength + fullMessage)
 
 #Function to tell the user how long ago they submitted a token refresh
 def timeLastCalled(current, lastCall):
