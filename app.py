@@ -355,12 +355,13 @@ def getDateArray(lastCalledDate):
     if len(sys.argv) > 1 and sys.argv[1] == "-m":
         
         #Print prompts and takes the single date for manual mode
-        print("\nEntering single date input mode: ")
-        userDate = str(input('Input Target Date: (YYYYMMDD) -- '))
+        print("\nEntering manual date input mode: ")
+        userDate = str(input('Input Target Date: (YYYYMMDD) [YYYMMDD . . .] || '))
         print()
+
+        #Makes an array of 1 - infinite dates
+        dateArray = userDate.split(' ')
         
-        #Makes an array of only one value
-        dateArray.append(userDate)
         return dateArray
 
     #Gets input from user if manual mode is not entered  
