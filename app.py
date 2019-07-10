@@ -31,7 +31,7 @@ callAmount = 0
 def main():
     
     global callAmount
-    
+
     #Prints cool banner using Figlet
     print()
     print()
@@ -102,31 +102,15 @@ def main():
                                 'activities-calories-intraday',
                                 'Calories',
                                 dateItem)
-        
-        #Gets the sleep data from the api
-        fit_statsSLE = auth2_client.sleep(date=date['dashDate'])
-        callAmount += 1
-       
-        #Initialize lists used
-        stime_list = []
-        sval_list = []
 
-        #Parse data
-        for i in fit_statsSLE['sleep'][0]['minuteData']:
-            stime_list.append(i['dateTime'])
-            sval_list.append(i['value'])
-        
-        #Creates a panda dataframe from the parsed dictionary
-        sleepDF = pd.DataFrame({'Time':stime_list, 
-                                'State':sval_list})
-        
-        #Casts the state from one of the three options 
-        sleepDF['Interpreted'] = sleepDF['State'].map({'2':'Awake', 
-                                                    '3':'Very Awake', 
-                                                    '1':'Asleep'})
-        
-        #Create a CSV file and save to it
-        writeToFile(sleepDF, 'Sleep', 'Sleep', dateItem, True, True, False)
+        #Collects and formats sleep 
+        intradayDataCollection('sleep', 
+                                auth2_client, 
+                                date['dashDate'], 
+                                'NA',
+                                'Sleep',  
+                                'Sleep', 
+                                dateItem)
 
         #SLEEP SUMMARY
         #Gets the local path of my sleep csv file
@@ -134,7 +118,7 @@ def main():
         sleepSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'SleepSummary1.csv')
         
         #Checks if date has already been inputted
-        if checkInputStatus(sleepSumPath, date, 'Sleep'):
+        if checkInputStatus(sleepSumPath, date, 'Sleep', True):
             
             #If not, get the summary statistics from the api
             fit_statsSum = auth2_client.sleep(date=date['dashDate'])['sleep'][0]            
@@ -175,7 +159,7 @@ def main():
         actSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'ActivitySummary1.csv')
 
         #See checkInputStatus()
-        if checkInputStatus(actSumPath, date, 'Activity'):
+        if checkInputStatus(actSumPath, date, 'Activity', True):
             
             #Calls the api for the activity summary
             sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
@@ -214,7 +198,7 @@ def main():
         foodSumPath = os.path.join(os.getcwd(), 'data', 'SummaryData', 'FoodSummary.csv')
         foodSumPath2 = os.path.join(os.getcwd(), 'data', 'SummaryData', 'FoodSummary1.csv')
 
-        if checkInputStatus(foodSumPath, date, 'Food'):
+        if checkInputStatus(foodSumPath, date, 'Food', True):
             
             foodStatsACT = auth2_client.foods_log(date=date['dashDate'])['summary']
             callAmount += 1
@@ -238,10 +222,9 @@ def main():
 
             print()
         
-    print("-- Collection successful. --")
+    print("\n-- Collection successful. --")
     print(str(callAmount) + " API call(s) were used during this program. \n")
     exit()
-
 
 #Takes the data from tokens.txt and gets the auth2_client needed by API
 def getAuth2Client():
@@ -372,8 +355,8 @@ def getDateArray(lastCalledDate):
     if len(sys.argv) > 1 and sys.argv[1] == "-m":
         
         #Print prompts and takes the single date for manual mode
-        print("Entering single date input mode: ")
-        userDate = str(input('\nInput Target Date: (YYYYMMDD) -- '))
+        print("\nEntering single date input mode: ")
+        userDate = str(input('Input Target Date: (YYYYMMDD) -- '))
         print()
         
         #Makes an array of only one value
@@ -493,8 +476,8 @@ def fixWhiteSpaces(inPath, outPath):
     #Delete the old file
     os.remove(inPath)
     
-    #Wait 500 ms because windows likes getting itself confused and saying the file doesn't exist
-    time.sleep(.5)                                      
+    #Wait 100 ms because windows likes getting itself confused and saying the file doesn't exist
+    time.sleep(.1)                                      
     
     #Make the outPath look exactly like the old inPath, effectively replacing it
     os.rename(outPath, inPath)
@@ -517,23 +500,51 @@ def intradayDataCollection(category, auth2_client, apiDate, detail, dtype, datat
     #If the file doesn't exist, or overwrite is on, execute if
     if not (os.path.isfile(fullPath)) or overwrite:
         
-        #Make an API call with the inputted values from function call
-        StatsDict = auth2_client.intraday_time_series(category,                             #Calls intraday calories series, interval = 1min
-                                                  base_date=apiDate, 
-                                                  detail_level=detail)
-        callAmount += 1
-        
-        #Parses the dictionary
-        for i in StatsDict[dtype]['dataset']:
-            dataList.append(i['value'])
-            timeList.append(i['time'])
-        
-        #Creates a dataframe from the parsed data
-        df = pd.DataFrame({'Time' :timeList, datatype : dataList,})
-        
-        #Writes the data to a file
-        df.to_csv(fullPath, index=True, header=True)
+        if dtype == 'Sleep':
+            fit_statsSLE = auth2_client.sleep(date=apiDate)
+            callAmount += 1
+            
+            #Initialize lists used
+            stime_list = []
+            sval_list = []
 
+            #Parse data
+            for i in fit_statsSLE['sleep'][0]['minuteData']:
+                stime_list.append(i['dateTime'])
+                sval_list.append(i['value'])
+            
+            #Creates a panda dataframe from the parsed dictionary
+            sleepDF = pd.DataFrame({'Time':stime_list, 
+                                    'State':sval_list})
+            
+            #Casts the state from one of the three options 
+            sleepDF['Interpreted'] = sleepDF['State'].map({'2':'Awake', 
+                                                        '3':'Very Awake', 
+                                                        '1':'Asleep'})
+            
+            #Create a CSV file and save to it
+            sleepDF.to_csv(fullPath, index=True, header=True)
+        
+        else:
+            
+            #Make an API call with the inputted values from function call
+            StatsDict = auth2_client.intraday_time_series(category,                             #Calls intraday calories series, interval = 1min
+                                                    base_date=apiDate, 
+                                                    detail_level=detail)
+            callAmount += 1
+            
+            #Parses the dictionary
+            for i in StatsDict[dtype]['dataset']:
+                dataList.append(i['value'])
+                timeList.append(i['time'])
+            
+            #Creates a dataframe from the parsed data
+            df = pd.DataFrame({'Time' :timeList, datatype : dataList,})
+            
+            #Writes the data to a file
+            df.to_csv(fullPath, index=True, header=True)
+            
+        
         #Output a message that the file already exists
         fullMessage = 'Created, Moving On. . .'
 
@@ -605,8 +616,9 @@ def timeLastCalled(current, lastCall):
 
 #IN: Path to File, date['slashDate']
 #OUT: False if data exists, True if not
-def checkInputStatus(path, date, name):
+def checkInputStatus(path, date, name, printBool):
     
+    #print('Opening ' + path + '\nas ' + str(date['spreadDate']) + ' ' + name)
     #Open the file described in function call
     with open(path,'a') as f:
 
@@ -617,13 +629,23 @@ def checkInputStatus(path, date, name):
         for i in tempDF['Date']:
 
             #If the file already exists, say so, if not, do nothing
+
+            #print('if ' + str(type(i)) + ' == str and ' + str(i) + ' == ' + str(date['spreadDate']))
             if type(i) == str and i == date['spreadDate']:
-                firstPart = date['inputDate'] + '_' + name + 'Summary'
-                spaceLength = (24 - len(firstPart))*' '
-                print(firstPart + spaceLength  + ' Already Added,  Skipping. . .')
+
+                if printBool:
+                    firstPart = date['inputDate'] + '_' + name + 'Summary'
+                    spaceLength = (24 - len(firstPart))*' '
+                    print('    - ' + firstPart + spaceLength  + ' Already Added,  Skipping. . .')
                 return False
         
         #Not sure why I'm returning true
+        #print('DID NOT ENTER IF************')
+        
+        if printBool:
+            firstPart = date['inputDate'] + '_' + name + 'Summary'
+            spaceLength = (24 - len(firstPart))*' '
+            print('    - ' + firstPart + spaceLength  + ' Added,  Moving On. . .')
         return True
         
 #Main:
