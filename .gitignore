@@ -3,3 +3,5 @@ tokens.txt
 gather_keys_oauth2.py
 data
 test.py
+uploadToDatabase.py
+convertsummarydateformat.py

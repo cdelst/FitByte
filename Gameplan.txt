@@ -27,4 +27,7 @@ FOR FUTURE:
     -Eliminate dependecies on hand-made files
     -Make more accessible to anyone who would want to use it, maybe Docker
 -Refactor
+-Add to server
+    -Make server
+    -Learn some SQL
 
