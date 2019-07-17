@@ -5,3 +5,4 @@ data
 test.py
 uploadToDatabase.py
 convertsummarydateformat.py
+__pycache__
