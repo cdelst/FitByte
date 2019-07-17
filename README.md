@@ -13,6 +13,9 @@ So far I have implemented features that make my everyday logging of data easier,
 Recommended with pipenv as an environment manager with python.  Before use, the user has to make a Fitbit Developer account and get two keys:
 USERID, and USERSECRET
 
+To get those keys, you will need to use an OAuth2 library.  It is easiest to download the file and put it in the same directory as the app. 
+[This](https://github.com/orcasgit/python-fitbit/blob/master/gather_keys_oauth2.py) is a link to the GitHub.  
+
 After getting those, replace the two lines in example_tokens.txt, and rename example_tokens.txt to "tokens.txt" --IMPORTANT
 
 As of now, you will have to have a file named data with this structure in it in the same file as your script:
@@ -25,9 +28,9 @@ As of now, you will have to have a file named data with this structure in it in 
 &nbsp;&nbsp;&nbsp;&nbsp;-Sleep  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;-Steps  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;-SummaryData<br>  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ ActivitySummary.csv<br>     
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ FoodSummary.csv<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ SleepSummary.csv9<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ ActivitySummary.csv  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ FoodSummary.csv
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ SleepSummary.csv9
 
 
 ### Running
