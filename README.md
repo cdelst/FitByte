@@ -27,10 +27,10 @@ As of now, you will have to have a file named data with this structure in it in 
 &nbsp;&nbsp;&nbsp;&nbsp;-Heart  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;-Sleep  <br>
 &nbsp;&nbsp;&nbsp;&nbsp;-Steps  <br>
-&nbsp;&nbsp;&nbsp;&nbsp;-SummaryData<br>  
+&nbsp;&nbsp;&nbsp;&nbsp;-SummaryData  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ ActivitySummary.csv  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ FoodSummary.csv
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ SleepSummary.csv9
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ FoodSummary.csv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ SleepSummary.csv
 
 
 ### Running
