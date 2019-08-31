@@ -56,7 +56,7 @@ def main():
         print("Calling Date: " + dateItem)
         
         #Creates a dictionary of all the different date formats used in this API, see f()
-        date = createDateFormats(dateItem)
+        date = createDateFormats(dateItem) #The list of date formats
 
         #Collects heartrate data by the second
         intradayDataCollection('activities/heart',
@@ -125,7 +125,7 @@ def main():
             callAmount += 1
 
             #Create a data frame from the contents of the api call
-            ssummarydf = pd.DataFrame({'Date':fit_statsSum['dateOfSleep'],
+            ssummarydf = pd.DataFrame({'Date':date['spreadDate'],
                                     'StartTime':fit_statsSum['startTime'][11:19],
                                     'MainSleep':fit_statsSum['isMainSleep'],
                                     'Efficiency':fit_statsSum['efficiency'],
@@ -163,7 +163,16 @@ def main():
             
             #Calls the api for the activity summary
             sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
-            callAmount += 1
+            
+            weightResponse = auth2_client.get_bodyweight(base_date=date['dashDate'])['weight']
+
+            if not weightResponse:
+                weightResponse = 'None'
+            else: 
+                weightResponse = weightResponse[0]
+        
+
+            callAmount += 2
 
             #Parses the api call into a dataframe
             actSumDF = pd.DataFrame({'Date':date['spreadDate'],
@@ -177,7 +186,8 @@ def main():
                                     'Fairly Active Minutes':sumFitStatsACT['fairlyActiveMinutes'],
                                     'Very Active Minutes':sumFitStatsACT['veryActiveMinutes'],
                                     'Floors':sumFitStatsACT['floors'],
-                                    'Steps':sumFitStatsACT['steps']} ,index=[0])
+                                    'Steps':sumFitStatsACT['steps'],
+                                    'Weight':weightResponse}, index=[0])
             
             #Open the location of the previous summary file
             with open(actSumPath,'a') as f:
@@ -648,8 +658,8 @@ def checkInputStatus(path, date, name, printBool):
             spaceLength = (24 - len(firstPart))*' '
             print('    - ' + firstPart + spaceLength  + ' Added,  Moving On. . .')
         return True
-        
+
+
 #Main:
-#I honestly still have no idea why you have to add this
 if __name__ == "__main__":
     main()
