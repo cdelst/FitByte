@@ -165,12 +165,13 @@ def main():
             sumFitStatsACT = auth2_client.activities(date=date['dashDate'])['summary']
             
             weightResponse = auth2_client.get_bodyweight(base_date=date['dashDate'])['weight']
-
+            
+            #print(weightResponse) #testing
             if not weightResponse:
                 weightResponse = 'None'
             else: 
-                weightResponse = weightResponse[0]
-        
+                weightResponse = weightResponse[0]['weight']
+            #print(weightResponse) #testing
 
             callAmount += 2
 
