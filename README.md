@@ -1,4 +1,4 @@
-# FitByte
+#  FitByte
 
 A project I started as I've been getting more and more interested in data manipulation and study after getting a FitBit Charge 3.  Right now it is a very rudimentary data collector using the FitBit web API :
 
@@ -8,7 +8,7 @@ My goal is to store as much data as physically possible, and after gathering eno
 
 So far I have implemented features that make my everyday logging of data easier, such as a date-last-called feature, as well as a completely functional sync-up-to feature that syncs from the last called date all the way up to the date you enter.  
 
-## Getting Started
+# # Getting Started
 
 Recommended with pipenv as an environment manager with python.  Before use, the user has to make a Fitbit Developer account and get two keys:
 USERID, and USERSECRET
@@ -33,7 +33,7 @@ As of now, you will have to have a file named data with this structure in it in 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ SleepSummary.csv
 
 
-### Running
+# ## Running
 
 Package management was done with Pipenv, so it is super easy...
 
@@ -56,22 +56,22 @@ oauthlib = 2.1.0
 
 These package versions are required for the API to work correctly
 
-## Built With
+# # Built With
 
 * [Python](https://www.python.org) - Scripting
 * [Fitbit API](https://github.com/orcasgit/python-fitbit) - API
 * [gather_keys_oauth2.py](https://github.com/orcasgit/python-fitbit/blob/master/gather_keys_oauth2.py) - For Oauth2 Authentification
 * [pyfiglet](https://www.devdungeon.com/content/create-ascii-art-text-banners-python) - For Word Art On Launch
 
-## Contributing
+# # Contributing
 
 If you would like to add something to my very basic app, just submit a pull request. 
 
-## Author
+# # Author
 
 * **Case Delst** - [Case Delst](https://github.com/CaseDelst)
 
-## Acknowledgments
+# # Acknowledgments
 
 * PurpleBooth for this README.md
 
